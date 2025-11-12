@@ -12,7 +12,7 @@ router.post("/contact", async (req, res) => {
     const newMessage = new Contact({ name, email, phone, message });
     await newMessage.save();
 
-    // ✅ Nodemailer setup
+    // Nodemailer
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -21,9 +21,9 @@ router.post("/contact", async (req, res) => {
       },
     });
 
-    // ✅ Email to YOU
     await transporter.sendMail({
-      from: email,
+      from: process.env.EMAIL_USER, // ✅ FIXED
+      replyTo: email,              // ✅ Use user's email here
       to: process.env.EMAIL_USER,
       subject: "New Contact Form Submission",
       text: `
@@ -42,12 +42,13 @@ Message: ${message}
     });
 
   } catch (error) {
+    console.error("Email Error:", error);
     res.status(500).json({
       success: false,
       message: "Error sending message ❌",
-      error,
     });
   }
 });
 
 export default router;
+
