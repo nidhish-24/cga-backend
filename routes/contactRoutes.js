@@ -1,53 +1,47 @@
 import express from "express";
 import Contact from "../models/contact.js";
-import nodemailer from "nodemailer";
+import twilio from "twilio";
 
 const router = express.Router();
+
+// Twilio client
+const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
 
 router.post("/contact", async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
 
-    // Save to DB
+    // ✅ Save message to DB
     const newMessage = new Contact({ name, email, phone, message });
     await newMessage.save();
 
-    // ✅ Nodemailer setup
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // ✅ Send SMS to admin
+    try {
+      await client.messages.create({
+        body: `📩 New Admission Enquiry\n\n👤 ${name}\n📧 ${email}\n📱 ${phone}\n📝 ${message}`,
+        from: process.env.TWILIO_PHONE,
+        to: process.env.ADMIN_PHONE,
+      });
 
-    // ✅ Email to YOU
-    await transporter.sendMail({
-      from: email,
-      to: process.env.EMAIL_USER,
-      subject: "New Contact Form Submission",
-      text: `
-New message from Website:
+      console.log("✅ SMS sent to admin");
+    } catch (smsError) {
+      console.log("⚠ SMS failed but message saved");
+    }
 
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
-Message: ${message}
-      `,
-    });
-
-    res.json({
+    return res.json({
       success: true,
-      message: "Message sent successfully ✅",
+      message: "Message submitted successfully ✅",
     });
 
   } catch (error) {
-    res.status(500).json({
+    console.error("Server Error:", error);
+    return res.status(500).json({
       success: false,
-      message: "Error sending message ❌",
-      error,
+      message: "Server Error ❌",
     });
   }
 });
 
 export default router;
+
+
