@@ -8,10 +8,14 @@ const app = express();
 
 // ✅ CORS
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type"]
+  origin: [
+    "http://localhost:5000",
+    "https://cga-frontend-smoky.vercel.app"
+  ],
+  methods: "GET,POST,DELETE",
+  credentials: true
 }));
+
 
 app.use(express.json());
 
