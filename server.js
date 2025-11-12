@@ -10,11 +10,14 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5000",
-    "https://cga-frontend-smoky.vercel.app"
+    "http://127.0.0.1:5000",
+    "https://cga-frontend-smoky.vercel.app",
+    "https://cga-frontend-git-main-shankar-nidhishs-projects.vercel.app"
   ],
-  methods: "GET,POST,DELETE",
-  credentials: true
+  methods: ["GET", "POST", "DELETE"],
+  allowedHeaders: ["Content-Type"],
 }));
+
 
 
 app.use(express.json());
