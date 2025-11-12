@@ -3,22 +3,48 @@ import Apply from "../models/apply.js";
 
 const router = express.Router();
 
-
+// ✅ Submit Application
 router.post("/apply", async (req, res) => {
   try {
-    const newApplication = new Apply(req.body);
+    const {
+      name,
+      email,
+      phone,
+      marks,
+      cutoff,
+      community,
+      group,
+      school,
+      address,
+      parentPhone
+    } = req.body;
+
+    const newApplication = new Apply({
+      name,         // ✅ Save name properly
+      email,
+      phone,
+      marks,
+      cutoff,
+      community,
+      group,
+      school,
+      address,
+      parentPhone
+    });
+
     await newApplication.save();
 
     res.json({ success: true, message: "Application submitted ✅" });
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).json({
       success: false,
       message: "Error saving application ❌",
-      error,
     });
   }
 });
-// ✅ Fetch all applications (Admin)
+
+// ✅ Get All Applications
 router.get("/applications", async (req, res) => {
   try {
     const apps = await Apply.find().sort({ createdAt: -1 });
@@ -28,7 +54,7 @@ router.get("/applications", async (req, res) => {
   }
 });
 
-// ✅ Delete an application
+// ✅ Delete Application
 router.delete("/applications/:id", async (req, res) => {
   try {
     await Apply.findByIdAndDelete(req.params.id);
@@ -37,6 +63,5 @@ router.delete("/applications/:id", async (req, res) => {
     res.status(500).json({ error: "Error deleting application" });
   }
 });
-
 
 export default router;
